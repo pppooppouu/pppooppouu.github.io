@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>XpppX's webpage</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #fdf6e3; /* 轻米黄色 */
+            font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 800px;
+            margin-top:200px;
+        }
+
+        .question-card {
+            background: #fff0f5; /* 淡粉 */
+            border: 1px solid #ffccd5;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 6px 10px rgba(0,0,0,0.08);
+        }
+
+            .question-card h2 {
+                margin: 0 0 15px 0;
+                font-size: 1.4rem;
+                color: #d6336c;
+            }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option {
+            background: #f5e0e0;
+            border: 1px solid #e0b0b0;
+            border-radius: 8px;
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: background .2s, transform .1s;
+            font-size: 1rem;
+            color: #333;
+        }
+
+            .option:hover {
+                background: #e8c8c8;
+                transform: translateY(-2px);
+            }
+
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            background: #fff8f8;
+            border-left: 4px solid #d6336c;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .next-btn {
+            margin-top: 12px;
+            display: inline-block;
+            background: #d6336c;
+            color: #fff;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: background .2s;
+        }
+
+            .next-btn:hover {
+                background: #b52758;
+            }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="quizContainer"></div>
+
+    <script>
+        /* 题库*/
+        const quizData = [
+            {
+                question: "最近为什么一直不开心<(＿　＿)>（想知道其他的答案，再做一遍咯！*^____^*）",
+                options: ["你别管，上你的课", "没啥","烦"],
+                result: [
+                    "<p>Garfield：这是我认真学习做出来的第一个网页。或许有点low！但我做了好久(* ￣︿￣)</p>",
+                    "<p>Garfield：没啥，那为啥回复消息1次1句，1句话2-9字不等(￣_,￣ )</p>",
+                    "<p>Garfield：是因为很多很多小破事的堆积吗？不管是不是或者想不想说，我做的网页还可以吧！ㄟ( ▔, ▔ ) ㄏ</p>"
+                ]
+            },
+            {
+                question: "今晚吃的啥(‾◡◝)",
+                options: ["关你屁事。？", "又吃胀了、","我不高兴"],
+                result: [
+                    "<p>Garfield：好吧！那你今晚吃的啥(•_•)</p>",
+                    "<p>Garfield：下次不许了，计划饮食走起来！胀了晚上就一点以后才能睡着(ノへ￣、)</p>",
+                    "<p>Garfield：不高兴就报复性吃吃吃然后把自己封闭起来吗。机器人。ㄟ( ▔, ▔ )ㄏ</p>"
+                ]
+            },
+            {
+                question: "下列那个选项最令你厌烦：",
+                options: ["宜宾中学院（临港校区）的恶之生存", "没长脑子的蠢货们！","夜间胡思乱想的事情"],
+                result: [
+                    "<p>Garfield：要真是来读高中的话，我就不会参加高考了(•_•)</p>",
+                    "<p>Garfield：感觉这个占的成分不大，单纯觉得傻逼。</p>",
+                    "<p>Garfield：不知道夜间综合征的成分有多少，但我觉得大概率有。但你只是一个循环的封闭体...类似于：服务器断连中...</p>"
+                ]
+            },
+            {
+                question: "对本次网页测试的满意度是（0-100分）：(从布局、美观、流畅等客观方面评价)",
+                options: ["100--85", "85--70","70--60","<=60"],
+                result: [
+                    "<p>谢谢您的认可！！筑波也这么觉得（￣︶￣）↗　</p>",
+                    "<p>感谢！筑波会继续努力认真学习的＜（＾－＾）＞</p>",
+                    "<p>筑波会进步的。现在可能技术有点low。/_ \ </p>",
+                    "<p>筑波下去一定好好学习┭┮﹏┭┮</p>"
+                ]
+            }
+        ];
+        /* -------------------------------------- */
+
+        const container = document.getElementById('quizContainer');
+        let currentIndex = 0; //当前题号
+
+        function renderQuestion(index) {
+            container.innerHTML = "";
+
+            if (index >= quizData.length) {
+                const endDiv = document.createElement('div');
+                endDiv.className = "question-card";
+                endDiv.innerHTML = "<h2>Hey, thanks for checking out this‘low’webpage I made.I don’t want you to think I’m just twiddling my thumbs or thinking nonsense because of your emotions. I’ve noticed you’ve been in a low mood for a while, and I wanted to check in on you. I know you probably won’t tell me why you’re down, but I’m guessing it’s because of a lot of annoying little things piled up that’s got you feeling frustrated.Additionally,you like to think nonsense, or maybe there’s something else you don’t want to talk about. Building webpages is part of our major, so don’t think I’m doing something unnecessary, okay? I hope you can feel better. I’m Garfield, the creator of this webpage.If you don't unhappy,just pretend that I didn't say it.</h2>";
+                container.appendChild(endDiv);
+                return;
+            }
+
+            const data = quizData[index];
+
+            const card = document.createElement('div');
+            card.className = "question-card";
+
+            const title = document.createElement('h2');
+            title.textContent = data.question;
+            card.appendChild(title);
+
+            const optBox = document.createElement('div');
+            optBox.className = "options";
+
+            data.options.forEach((optText, optIdx) => {
+                const btn = document.createElement('div');
+                btn.className = "option";
+                btn.textContent = optText;
+
+                btn.addEventListener('click', () => {
+                    if (card.querySelector('.result')) return;
+
+                    //显示答案
+                    const resultDiv = document.createElement('div');
+                    resultDiv.className = "result";
+                    resultDiv.innerHTML = data.result[optIdx];
+                    card.appendChild(resultDiv);
+
+                    //next button
+                    const nextBtn = document.createElement('button');
+                    nextBtn.className = "next-btn";
+                    nextBtn.textContent = "别废话赶紧放下一个屁！";
+                    nextBtn.addEventListener('click', () => {
+                        currentIndex++;
+                        renderQuestion(currentIndex);
+                    });
+                    resultDiv.appendChild(nextBtn);
+                });
+
+                optBox.appendChild(btn);
+            });
+
+            card.appendChild(optBox);
+            container.appendChild(card);
+        }
+
+        renderQuestion(currentIndex);
+    </script>
+</body>
+</html>
